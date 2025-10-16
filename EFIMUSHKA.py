@@ -1,9 +1,10 @@
 # app.py
 
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, render_template_string, redirect, url_for
 import random
-import os
+import os # Добавляем для получения PORT
 
+# --- Класс игры (остаётся без изменений, кроме методов отображения) ---
 class FPVQuizGame:
     def __init__(self):
         self.score = 0
@@ -11,7 +12,7 @@ class FPVQuizGame:
         self.components_learned = set()
         self.transfer_code = ""
 
-        # База данных компонентов FPV дронов (расширенная)
+        # --- База данных компонентов (остаётся без изменений) ---
         self.components = {
             "Фрейм (рама)": {
                 "description": 'Основа дрона, к которой крепятся все компоненты. Бывают разных размеров (3", 5" и т.д.)',
@@ -211,7 +212,7 @@ class FPVQuizGame:
             },
         }
 
-        # Популярные модели дронов (расширенный список)
+        # --- Популярные модели дронов (остаётся без изменений) ---
         self.drones = {
             "DJI FPV": {
                 "type": "Готовый дрон",
@@ -299,7 +300,7 @@ class FPVQuizGame:
             },
         }
 
-        # Модели пультов управления
+        # --- Модели пультов управления (остаётся без изменений) ---
         self.controllers = {
             "RadioMaster TX12": {
                 "description": "Бюджетный пульт с цветным дисплеем",
@@ -354,9 +355,9 @@ class FPVQuizGame:
           │ ( ) ( ) │
           │ / \\ / \\ │
           │ │
-          │ ┌───────┐ │
+          │ ┌─────┐ │
           │ │ LCD │ │
-          │ └───────┘ │
+          │ └─────┘ │
           │ │
           │ [ ] [ ] [ ] │
           │ │
@@ -386,11 +387,11 @@ class FPVQuizGame:
           ┌─────────────────┐
           │ DJI FPV RC2 │
           │ │
-          │ ┌───────┐ │
+          │ ┌─────┐ │
           │ │ │ │
           │ │ LCD │ │
           │ │ │ │
-          │ └───────┘ │
+          │ └─────┘ │
           │ │
           │ ( ) ( ) │
           │ / \\ / \\ │
@@ -415,7 +416,7 @@ class FPVQuizGame:
             },
         }
 
-        # Модели FPV шлемов
+        # --- Модели FPV шлемов (остаётся без изменений) ---
         self.goggles = {
             "DJI FPV Goggles 2": {
                 "description": "Цифровой шлем от DJI",
@@ -673,71 +674,442 @@ class FPVQuizGame:
         """
         return results_page
 
-    # --- Добавьте другие методы викторин и отображения ---
-    # (quiz_drones, learning_components, show_controllers, show_goggles, data_transfer, show_stats)
-    # Для простоты, опустим их реализацию в HTML, но они должны быть аналогичны quiz_components
-    # или возвращать простые страницы с информацией.
-
+    # --- НОВАЯ РЕАЛИЗАЦИЯ: Викторина дронов ---
     def quiz_drones(self):
-        # Пример упрощённой страницы
-        return """
+        """Возвращает HTML-страницу с викториной дронов"""
+        drones = list(self.drones.keys())
+        random.shuffle(drones)
+        num_questions = random.randint(2, min(4, len(drones)))
+
+        questions_html = ""
+        for i, drone in enumerate(drones[:num_questions], 1):
+            drone_info = self.drones[drone]
+            question_type = random.choice(["type", "features", "description"])
+            if question_type == "type":
+                text = drone_info["type"]
+            elif question_type == "features":
+                features = random.sample(drone_info["features"], min(2, len(drone_info["features"])))
+                text = ", ".join(features)
+            else:
+                text = drone_info["description"]
+
+            options = [drone]
+            wrong_options = [d for d in drones if d != drone]
+            random.shuffle(wrong_options)
+            options.extend(wrong_options[:2])
+            random.shuffle(options)
+
+            options_html = ""
+            for j, opt in enumerate(options, 1):
+                options_html += f'<input type="radio" name="q{i}" value="{opt}" required> {opt}<br>'
+
+            questions_html += f"""
+            <div style="margin-bottom: 20px;">
+                <h3>Вопрос {i}/{num_questions}</h3>
+                <p><strong>{question_type.upper()}:</strong> {text}</p>
+                <div>
+                    {options_html}
+                </div>
+            </div>
+            """
+
+        quiz_html = f"""
         <html>
+        <head>
+            <title>🚁 Викторина: Угадай дрон</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .back {{ margin-top: 20px; }}
+                .back a {{ color: #3498db; text-decoration: none; }}
+            </style>
+        </head>
         <body>
-            <h1>Викторина: Угадай дрон (реализация в HTML)</h1>
-            <p>Здесь будет реализована викторина по дронам.</p>
-            <a href="/">← Назад в меню</a>
+            <div class="container">
+                <h1>🚁 Викторина: Угадай дрон</h1>
+                <form method="POST">
+                    {questions_html}
+                    <input type="hidden" name="num_questions" value="{num_questions}">
+                    <input type="hidden" name="drones" value="{'|'.join(drones[:num_questions])}">
+                    <input type="submit" value="Отправить ответы">
+                </form>
+                <div class="back"><a href="/">← Назад в меню</a></div>
+            </div>
         </body>
         </html>
         """
+        return quiz_html
 
+    def handle_quiz_drones_submit(self, form_data):
+        """Обрабатывает отправку формы викторины дронов"""
+        num_questions = int(form_data.get('num_questions', 0))
+        drones_str = form_data.get('drones', '')
+        submitted_drones = drones_str.split('|')
+
+        score_increment = 0
+        results_html = "<h2>Результаты викторины дронов:</h2>"
+        for i in range(1, num_questions + 1):
+            user_answer = form_data.get(f'q{i}')
+            correct_answer = submitted_drones[i - 1]
+
+            if user_answer == correct_answer:
+                result = "✅ ПРАВИЛЬНО!"
+                score_increment += 15
+            else:
+                result = f"❌ НЕПРАВИЛЬНО! Правильный ответ: {correct_answer}"
+
+            self.questions_answered += 1
+
+            # Получаем информацию о дроне для отображения
+            drone_info = self.drones[correct_answer]
+            results_html += f"""
+            <div style="margin-bottom: 20px;">
+                <p>{result}</p>
+                <pre>{drone_info['image']}</pre>
+                <p><strong>Назначение:</strong> {drone_info['function']}</p>
+            </div>
+            """
+
+        self.score += score_increment
+        results_html += f"<p><strong>Получено очков за раунд:</strong> {score_increment}</p>"
+
+        results_page = f"""
+        <html>
+        <head>
+            <title>Результаты викторины дронов</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .back a {{ color: #3498db; text-decoration: none; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Результаты викторины дронов</h1>
+                {results_html}
+                <p><a href="/">← Назад в меню</a></p>
+            </div>
+        </body>
+        </html>
+        """
+        return results_page
+
+    # --- НОВАЯ РЕАЛИЗАЦИЯ: Обучалка компонентов ---
     def learning_components(self):
-        # Пример упрощённой страницы
-        return """
+        """Возвращает HTML-страницу с обучалкой компонентов"""
+        components = list(self.components.keys())
+        random.shuffle(components) # Рандомный порядок
+
+        components_html = ""
+        for i, component in enumerate(components, 1):
+            learned = "✅" if component in self.components_learned else " "
+            components_html += f'<a href="/learning_component/{component}" class="menu-item">{learned} {component}</a>\n'
+
+        learning_page = f"""
         <html>
+        <head>
+            <title>📚 Обучалка: Компоненты FPV дрона</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .menu-item {{ margin: 10px 0; padding: 10px; background-color: #3498db; color: white; text-decoration: none; display: block; text-align: center; border-radius: 5px; }}
+                .menu-item:hover {{ background-color: #2980b9; }}
+                .back {{ margin-top: 20px; }}
+                .back a {{ color: #3498db; text-decoration: none; }}
+            </style>
+        </head>
         <body>
-            <h1>Обучалка: Компоненты FPV дрона (реализация в HTML)</h1>
-            <p>Здесь будет реализована страница обучения компонентам.</p>
-            <a href="/">← Назад в меню</a>
+            <div class="container">
+                <h1>📚 Обучалка: Компоненты FPV дрона</h1>
+                {components_html}
+                <div class="back"><a href="/">← Назад в меню</a></div>
+            </div>
         </body>
         </html>
         """
+        return learning_page
 
+    def show_component_info(self, component_name):
+        """Возвращает HTML-страницу с информацией о конкретном компоненте"""
+        if component_name not in self.components:
+            return "<h1>Компонент не найден</h1><a href='/'>← Назад в меню</a>"
+
+        info = self.components[component_name]
+        self.components_learned.add(component_name) # Отмечаем как изученное
+
+        component_page = f"""
+        <html>
+        <head>
+            <title>🔧 {component_name.upper()}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .back a {{ color: #3498db; text-decoration: none; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🔧 {component_name.upper()}</h1>
+                <pre>{info['image']}</pre>
+                <p><strong>Описание:</strong> {info['description']}</p>
+                <p><strong>Функция:</strong> {info['function']}</p>
+                <p><strong>Интересные факты:</strong></p>
+                <ul>
+        """
+        for fact in info['facts']:
+            component_page += f"<li>{fact}</li>"
+        component_page += """
+                </ul>
+                <a href="/learning_components">← Назад к обучалке</a> | <a href="/">← Назад в меню</a>
+            </div>
+        </body>
+        </html>
+        """
+        return component_page
+
+    # --- НОВАЯ РЕАЛИЗАЦИЯ: Показ пультов ---
     def show_controllers(self):
-        # Пример упрощённой страницы
-        return """
+        """Возвращает HTML-страницу с коллекцией пультов"""
+        controllers = list(self.controllers.keys())
+
+        controllers_html = ""
+        for controller in controllers:
+            controllers_html += f'<a href="/show_controller/{controller}" class="menu-item">{controller}</a>\n'
+
+        controller_page = f"""
         <html>
+        <head>
+            <title>🎮 Коллекция FPV пультов</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .menu-item {{ margin: 10px 0; padding: 10px; background-color: #3498db; color: white; text-decoration: none; display: block; text-align: center; border-radius: 5px; }}
+                .menu-item:hover {{ background-color: #2980b9; }}
+                .back a {{ color: #3498db; text-decoration: none; }}
+            </style>
+        </head>
         <body>
-            <h1>FPV Пульты (реализация в HTML)</h1>
-            <p>Здесь будет реализована страница с пультами.</p>
-            <a href="/">← Назад в меню</a>
+            <div class="container">
+                <h1>🎮 Коллекция FPV пультов</h1>
+                {controllers_html}
+                <a href="/">← Назад в меню</a>
+            </div>
         </body>
         </html>
         """
+        return controller_page
 
+    def show_controller_details(self, controller_name):
+        """Возвращает HTML-страницу с деталями пульта"""
+        if controller_name not in self.controllers:
+            return "<h1>Пульт не найден</h1><a href='/'>← Назад в меню</a>"
+
+        info = self.controllers[controller_name]
+
+        controller_details_page = f"""
+        <html>
+        <head>
+            <title>🎮 {controller_name.upper()}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .back a {{ color: #3498db; text-decoration: none; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🎮 {controller_name.upper()}</h1>
+                <p><strong>Описание:</strong> {info['description']}</p>
+                <p><strong>Ценовой диапазон:</strong> {info['price_range']}</p>
+                <p><strong>Особенности:</strong> {', '.join(info['features'])}</p>
+                <h3>Вид спереди:</h3>
+                <pre>{info['views']['front']}</pre>
+                <h3>Вид сбоку:</h3>
+                <pre>{info['views']['side']}</pre>
+                <a href="/show_controllers">← Назад к коллекции</a> | <a href="/">← Назад в меню</a>
+            </div>
+        </body>
+        </html>
+        """
+        return controller_details_page
+
+    # --- НОВАЯ РЕАЛИЗАЦИЯ: Показ шлемов ---
     def show_goggles(self):
-        # Пример упрощённой страницы
-        return """
-        <html>
-        <body>
-            <h1>FPV Шлемы (реализация в HTML)</h1>
-            <p>Здесь будет реализована страница с шлемами.</p>
-            <a href="/">← Назад в меню</a>
-        </body>
-        </html>
-        """
+        """Возвращает HTML-страницу с коллекцией шлемов"""
+        goggles = list(self.goggles.keys())
 
-    def data_transfer(self):
-        # Пример упрощённой страницы
-        return f"""
+        goggles_html = ""
+        for goggle in goggles:
+            goggles_html += f'<a href="/show_goggle/{goggle}" class="menu-item">{goggle}</a>\n'
+
+        goggles_page = f"""
         <html>
+        <head>
+            <title>🥽 Коллекция FPV шлемов</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .menu-item {{ margin: 10px 0; padding: 10px; background-color: #3498db; color: white; text-decoration: none; display: block; text-align: center; border-radius: 5px; }}
+                .menu-item:hover {{ background-color: #2980b9; }}
+                .back a {{ color: #3498db; text-decoration: none; }}
+            </style>
+        </head>
         <body>
-            <h1>Передача данных</h1>
-            <p>Код передачи: {self.transfer_code or 'Не создан'}</p>
-            <p>Изучено компонентов: {len(self.components_learned)}</p>
-            <a href="/">← Назад в меню</a>
+            <div class="container">
+                <h1>🥽 Коллекция FPV шлемов</h1>
+                {goggles_html}
+                <a href="/">← Назад в меню</a>
+            </div>
         </body>
         </html>
         """
+        return goggles_page
+
+    def show_goggle_details(self, goggle_name):
+        """Возвращает HTML-страницу с деталями шлема"""
+        if goggle_name not in self.goggles:
+            return "<h1>Шлем не найден</h1><a href='/'>← Назад в меню</a>"
+
+        info = self.goggles[goggle_name]
+
+        goggle_details_page = f"""
+        <html>
+        <head>
+            <title>🥽 {goggle_name.upper()}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .back a {{ color: #3498db; text-decoration: none; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>🥽 {goggle_name.upper()}</h1>
+                <p><strong>Описание:</strong> {info['description']}</p>
+                <p><strong>Ценовой диапазон:</strong> {info['price_range']}</p>
+                <p><strong>Особенности:</strong> {', '.join(info['features'])}</p>
+                <h3>Вид спереди:</h3>
+                <pre>{info['views']['front']}</pre>
+                <h3>Вид сбоку:</h3>
+                <pre>{info['views']['side']}</pre>
+                <a href="/show_goggles">← Назад к коллекции</a> | <a href="/">← Назад в меню</a>
+            </div>
+        </body>
+        </html>
+        """
+        return goggle_details_page
+
+    # --- НОВАЯ РЕАЛИЗАЦИЯ: Передача данных ---
+    def data_transfer(self):
+        """Возвращает HTML-страницу для передачи данных"""
+        if not self.components_learned:
+            transfer_page = f"""
+            <html>
+            <body>
+                <h1>📡 Передача данных</h1>
+                <p>❌ У вас нет изученных компонентов для передачи!</p>
+                <p>Сначала изучите компоненты в обучалке или викторине.</p>
+                <a href="/">← Назад в меню</a>
+            </body>
+            </html>
+            """
+        else:
+            # Создаем код передачи
+            components_str = ",".join(sorted(self.components_learned))
+            self.transfer_code = f"FPV{self.score:04d}{len(self.components_learned):02d}"
+
+            transfer_page = f"""
+            <html>
+            <head>
+                <title>📡 Передача данных</title>
+                <style>
+                    body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                    .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                    .back a {{ color: #3498db; text-decoration: none; }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>📡 Передача данных</h1>
+                    <p><strong>Ваш счет:</strong> {self.score}</p>
+                    <p><strong>Изучено компонентов:</strong> {len(self.components_learned)}</p>
+                    <p><strong>Код передачи:</strong> <code>{self.transfer_code}</code></p>
+                    <h3>КАК ПЕРЕДАТЬ ДАННЫЕ:</h3>
+                    <ol>
+                        <li>Запомните код передачи выше</li>
+                        <li>На другом телефоне запустите эту программу</li>
+                        <li>Выберите 'Передача данных' -> 'Получить данные'</li>
+                        <li>Введите код передачи</li>
+                    </ol>
+                    <h3>Получить данные по коду</h3>
+                    <form method="POST" action="/receive_data">
+                        <input type="text" name="code" placeholder="Введите код передачи" required>
+                        <input type="submit" value="Получить">
+                    </form>
+                    <a href="/">← Назад в меню</a>
+                </div>
+            </body>
+            </html>
+            """
+        return transfer_page
+
+    def receive_data(self, form_data):
+        """Обрабатывает получение данных по коду"""
+        code = form_data.get('code', '').strip().upper()
+
+        if len(code) != 9 or not code.startswith("FPV"):
+            result_message = "❌ Неверный формат кода!"
+        else:
+            try:
+                score = int(code[3:7])
+                components_count = int(code[7:9])
+
+                result_message = f"""
+                ✅ Данные успешно получены!<br>
+                🏆 Счет друга: {score}<br>
+                📚 Изучено компонентов: {components_count}
+                """
+                if score > self.score:
+                    result_message += "<br>🎯 Ваш друг знает больше вас! Продолжайте учиться!"
+                else:
+                    result_message += "<br>⭐ Вы знаете больше своего друга! Так держать!"
+
+                # "Импортируем" несколько компонентов
+                available_components = [
+                    c for c in self.components.keys() if c not in self.components_learned
+                ]
+                if available_components:
+                    imported = random.sample(
+                        available_components, min(2, len(available_components))
+                    )
+                    for comp in imported:
+                        self.components_learned.add(comp)
+                    result_message += f"<br>📖 Вы узнали о новых компонентах: {', '.join(imported)}"
+
+            except ValueError:
+                result_message = "❌ Ошибка в коде передачи!"
+
+        receive_result_page = f"""
+        <html>
+        <head>
+            <title>📥 Результат получения данных</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
+                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .back a {{ color: #3498db; text-decoration: none; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>📥 Результат получения данных</h1>
+                <p>{result_message}</p>
+                <a href="/data_transfer">← Назад к передаче данных</a> | <a href="/">← Назад в меню</a>
+            </div>
+        </body>
+        </html>
+        """
+        return receive_result_page
+
 
     def show_stats(self):
         progress = len(self.components_learned) / len(self.components) * 100
@@ -794,25 +1166,46 @@ def quiz_components_page():
 def quiz_components_submit():
     return game_instance.handle_quiz_components_submit(request.form)
 
+# --- НОВЫЕ МАРШРУТЫ ---
 @app.route('/quiz_drones')
 def quiz_drones_page():
     return game_instance.quiz_drones()
+
+@app.route('/quiz_drones', methods=['POST'])
+def quiz_drones_submit():
+    return game_instance.handle_quiz_drones_submit(request.form)
 
 @app.route('/learning_components')
 def learning_components_page():
     return game_instance.learning_components()
 
+@app.route('/learning_component/<component_name>')
+def show_component_detail(component_name):
+    return game_instance.show_component_info(component_name)
+
 @app.route('/show_controllers')
 def show_controllers_page():
     return game_instance.show_controllers()
+
+@app.route('/show_controller/<controller_name>')
+def show_controller_detail(controller_name):
+    return game_instance.show_controller_details(controller_name)
 
 @app.route('/show_goggles')
 def show_goggles_page():
     return game_instance.show_goggles()
 
+@app.route('/show_goggle/<goggle_name>')
+def show_goggle_detail(goggle_name):
+    return game_instance.show_goggle_details(goggle_name)
+
 @app.route('/data_transfer')
 def data_transfer_page():
     return game_instance.data_transfer()
+
+@app.route('/receive_data', methods=['POST'])
+def receive_data_submit():
+    return game_instance.receive_data(request.form)
 
 @app.route('/stats')
 def stats_page():
