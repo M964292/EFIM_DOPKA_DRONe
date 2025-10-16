@@ -1,4 +1,4 @@
-# app.py
+# EFIMUSHKA.py
 
 from flask import Flask, request, render_template_string, redirect, url_for
 import random
@@ -15,7 +15,7 @@ class FPVQuizGame:
         # --- База данных компонентов (остаётся без изменений) ---
         self.components = {
             "Фрейм (рама)": {
-                "description": 'Основа дрона, к которой крепятся все компоненты. Бывают разных размеров (3", 5" и т.д.)',
+                "description": 'Основа дрона, к которой крепляются все компоненты. Бывают разных размеров (3", 5" и т.д.)',
                 "image": """
           ┌─────┐
           │ │
@@ -355,9 +355,9 @@ class FPVQuizGame:
           │ ( ) ( ) │
           │ / \\ / \\ │
           │ │
-          │ ┌─────┐ │
+          │ ┌───────┐ │
           │ │ LCD │ │
-          │ └─────┘ │
+          │ └───────┘ │
           │ │
           │ [ ] [ ] [ ] │
           │ │
@@ -387,11 +387,11 @@ class FPVQuizGame:
           ┌─────────────────┐
           │ DJI FPV RC2 │
           │ │
-          │ ┌─────┐ │
+          │ ┌───────┐ │
           │ │ │ │
           │ │ LCD │ │
           │ │ │ │
-          │ └─────┘ │
+          │ └───────┘ │
           │ │
           │ ( ) ( ) │
           │ / \\ / \\ │
@@ -524,13 +524,90 @@ class FPVQuizGame:
         <html>
         <head>
             <title>🎯 FPV ДРОНЫ: Викторина и Обучение</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                h1 {{ color: #2c3e50; text-align: center; }}
-                .menu-item {{ margin: 10px 0; padding: 10px; background-color: #3498db; color: white; text-decoration: none; display: block; text-align: center; border-radius: 5px; }}
-                .menu-item:hover {{ background-color: #2980b9; }}
-                .stats {{ margin-top: 20px; padding: 10px; background-color: #ecf0f1; border-radius: 5px; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box; /* Включаем padding и border в расчёт ширины */
+                }}
+                .container {{
+                    max-width: 100%; /* Максимальная ширина 100% */
+                    width: 100%;
+                    margin: 0 auto; /* Центрируем */
+                    background-color: white;
+                    padding: 15px; /* Уменьшаем отступы */
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box; /* Включаем padding и border в расчёт ширины */
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.8em; /* Уменьшаем размер шрифта заголовка */
+                    margin-bottom: 20px;
+                }}
+                .menu-item {{
+                    margin: 10px 0;
+                    padding: 12px 15px; /* Увеличиваем отступы для удобства нажатия */
+                    background-color: #3498db;
+                    color: white;
+                    text-decoration: none;
+                    display: block;
+                    text-align: center;
+                    border-radius: 5px;
+                    font-size: 1.1em; /* Увеличиваем размер шрифта для удобства */
+                    transition: background-color 0.3s ease; /* Плавный переход цвета */
+                }}
+                .menu-item:hover {{
+                    background-color: #2980b9;
+                }}
+                .stats {{
+                    margin-top: 20px;
+                    padding: 15px;
+                    background-color: #ecf0f1;
+                    border-radius: 5px;
+                    font-size: 0.95em; /* Уменьшаем размер шрифта статистики */
+                }}
+                .stats p {{
+                    margin: 5px 0;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.6em;
+                    }}
+                    .menu-item {{
+                        padding: 15px; /* Ещё больше отступов для удобства на сенсоре */
+                        font-size: 1.2em;
+                    }}
+                    .stats {{
+                        font-size: 0.9em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .menu-item {{
+                        padding: 18px; /* Максимум отступов на маленьких экранах */
+                        font-size: 1.3em;
+                    }}
+                    .stats {{
+                        font-size: 0.85em;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -579,13 +656,13 @@ class FPVQuizGame:
 
             options_html = ""
             for j, opt in enumerate(options, 1):
-                options_html += f'<input type="radio" name="q{i}" value="{opt}" required> {opt}<br>'
+                options_html += f'<input type="radio" name="q{i}" value="{opt}" required style="margin-right: 8px;"> {opt}<br>'
 
             questions_html += f"""
             <div style="margin-bottom: 20px;">
-                <h3>Вопрос {i}/{num_questions}</h3>
+                <h3 style="font-size: 1.2em;">Вопрос {i}/{num_questions}</h3>
                 <p><strong>{question_type.upper()}:</strong> {text}</p>
-                <div>
+                <div style="margin-top: 10px;">
                     {options_html}
                 </div>
             </div>
@@ -595,11 +672,65 @@ class FPVQuizGame:
         <html>
         <head>
             <title>🧩 Викторина: Угадай компонент</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .back {{ margin-top: 20px; }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 20px;
+                }}
+                .back {{
+                    margin-top: 20px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -609,7 +740,7 @@ class FPVQuizGame:
                     {questions_html}
                     <input type="hidden" name="num_questions" value="{num_questions}">
                     <input type="hidden" name="components" value="{'|'.join(components[:num_questions])}">
-                    <input type="submit" value="Отправить ответы">
+                    <input type="submit" value="Отправить ответы" style="padding: 10px 20px; font-size: 1.1em; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
                 </form>
                 <div class="back"><a href="/">← Назад в меню</a></div>
             </div>
@@ -625,7 +756,7 @@ class FPVQuizGame:
         submitted_components = components_str.split('|')
 
         score_increment = 0
-        results_html = "<h2>Результаты викторины:</h2>"
+        results_html = "<h2 style='font-size: 1.3em;'>Результаты викторины:</h2>"
         for i in range(1, num_questions + 1):
             user_answer = form_data.get(f'q{i}')
             correct_answer = submitted_components[i - 1]
@@ -642,25 +773,77 @@ class FPVQuizGame:
             # Получаем информацию о компоненте для отображения
             comp_info = self.components[correct_answer]
             results_html += f"""
-            <div style="margin-bottom: 20px;">
-                <p>{result}</p>
-                <pre>{comp_info['image']}</pre>
+            <div style="margin-bottom: 20px; padding: 10px; border-left: 3px solid #3498db; background-color: #f8f9fa;">
+                <p style="font-weight: bold;">{result}</p>
+                <pre style="white-space: pre-wrap; word-wrap: break-word; font-size: 0.9em;">{comp_info['image']}</pre>
                 <p><strong>Функция:</strong> {comp_info['function']}</p>
                 <p><strong>Интересный факт:</strong> {random.choice(comp_info['facts'])}</p>
             </div>
             """
 
         self.score += score_increment
-        results_html += f"<p><strong>Получено очков за раунд:</strong> {score_increment}</p>"
+        results_html += f"<p style='font-weight: bold; font-size: 1.1em;'><strong>Получено очков за раунд:</strong> {score_increment}</p>"
 
         results_page = f"""
         <html>
         <head>
             <title>Результаты викторины</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 20px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -701,13 +884,13 @@ class FPVQuizGame:
 
             options_html = ""
             for j, opt in enumerate(options, 1):
-                options_html += f'<input type="radio" name="q{i}" value="{opt}" required> {opt}<br>'
+                options_html += f'<input type="radio" name="q{i}" value="{opt}" required style="margin-right: 8px;"> {opt}<br>'
 
             questions_html += f"""
             <div style="margin-bottom: 20px;">
-                <h3>Вопрос {i}/{num_questions}</h3>
+                <h3 style="font-size: 1.2em;">Вопрос {i}/{num_questions}</h3>
                 <p><strong>{question_type.upper()}:</strong> {text}</p>
-                <div>
+                <div style="margin-top: 10px;">
                     {options_html}
                 </div>
             </div>
@@ -717,11 +900,65 @@ class FPVQuizGame:
         <html>
         <head>
             <title>🚁 Викторина: Угадай дрон</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .back {{ margin-top: 20px; }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 20px;
+                }}
+                .back {{
+                    margin-top: 20px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -731,7 +968,7 @@ class FPVQuizGame:
                     {questions_html}
                     <input type="hidden" name="num_questions" value="{num_questions}">
                     <input type="hidden" name="drones" value="{'|'.join(drones[:num_questions])}">
-                    <input type="submit" value="Отправить ответы">
+                    <input type="submit" value="Отправить ответы" style="padding: 10px 20px; font-size: 1.1em; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">
                 </form>
                 <div class="back"><a href="/">← Назад в меню</a></div>
             </div>
@@ -747,7 +984,7 @@ class FPVQuizGame:
         submitted_drones = drones_str.split('|')
 
         score_increment = 0
-        results_html = "<h2>Результаты викторины дронов:</h2>"
+        results_html = "<h2 style='font-size: 1.3em;'>Результаты викторины дронов:</h2>"
         for i in range(1, num_questions + 1):
             user_answer = form_data.get(f'q{i}')
             correct_answer = submitted_drones[i - 1]
@@ -763,24 +1000,76 @@ class FPVQuizGame:
             # Получаем информацию о дроне для отображения
             drone_info = self.drones[correct_answer]
             results_html += f"""
-            <div style="margin-bottom: 20px;">
-                <p>{result}</p>
-                <pre>{drone_info['image']}</pre>
+            <div style="margin-bottom: 20px; padding: 10px; border-left: 3px solid #3498db; background-color: #f8f9fa;">
+                <p style="font-weight: bold;">{result}</p>
+                <pre style="white-space: pre-wrap; word-wrap: break-word; font-size: 0.9em;">{drone_info['image']}</pre>
                 <p><strong>Назначение:</strong> {drone_info['function']}</p>
             </div>
             """
 
         self.score += score_increment
-        results_html += f"<p><strong>Получено очков за раунд:</strong> {score_increment}</p>"
+        results_html += f"<p style='font-weight: bold; font-size: 1.1em;'><strong>Получено очков за раунд:</strong> {score_increment}</p>"
 
         results_page = f"""
         <html>
         <head>
             <title>Результаты викторины дронов</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 20px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -809,13 +1098,88 @@ class FPVQuizGame:
         <html>
         <head>
             <title>📚 Обучалка: Компоненты FPV дрона</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .menu-item {{ margin: 10px 0; padding: 10px; background-color: #3498db; color: white; text-decoration: none; display: block; text-align: center; border-radius: 5px; }}
-                .menu-item:hover {{ background-color: #2980b9; }}
-                .back {{ margin-top: 20px; }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 20px;
+                }}
+                .menu-item {{
+                    margin: 10px 0;
+                    padding: 12px 15px;
+                    background-color: #3498db;
+                    color: white;
+                    text-decoration: none;
+                    display: block;
+                    text-align: center;
+                    border-radius: 5px;
+                    font-size: 1.1em;
+                    transition: background-color 0.3s ease;
+                }}
+                .menu-item:hover {{
+                    background-color: #2980b9;
+                }}
+                .back {{
+                    margin-top: 20px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .menu-item {{
+                        padding: 15px;
+                        font-size: 1.2em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .menu-item {{
+                        padding: 18px;
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -841,10 +1205,86 @@ class FPVQuizGame:
         <html>
         <head>
             <title>🔧 {component_name.upper()}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 15px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                    margin-right: 10px;
+                }}
+                pre {{
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    font-size: 0.9em;
+                    background-color: #f8f9fa;
+                    padding: 10px;
+                    border-radius: 4px;
+                    overflow-x: auto; /* Прокрутка по горизонтали при необходимости */
+                }}
+                ul {{
+                    padding-left: 20px;
+                }}
+                li {{
+                    margin-bottom: 5px;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                    pre {{
+                        font-size: 0.85em;
+                        padding: 8px;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                    pre {{
+                        font-size: 0.8em;
+                        padding: 6px;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -860,7 +1300,9 @@ class FPVQuizGame:
             component_page += f"<li>{fact}</li>"
         component_page += """
                 </ul>
-                <a href="/learning_components">← Назад к обучалке</a> | <a href="/">← Назад в меню</a>
+                <div>
+                    <a href="/learning_components">← Назад к обучалке</a> | <a href="/">← Назад в меню</a>
+                </div>
             </div>
         </body>
         </html>
@@ -880,12 +1322,85 @@ class FPVQuizGame:
         <html>
         <head>
             <title>🎮 Коллекция FPV пультов</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .menu-item {{ margin: 10px 0; padding: 10px; background-color: #3498db; color: white; text-decoration: none; display: block; text-align: center; border-radius: 5px; }}
-                .menu-item:hover {{ background-color: #2980b9; }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 20px;
+                }}
+                .menu-item {{
+                    margin: 10px 0;
+                    padding: 12px 15px;
+                    background-color: #3498db;
+                    color: white;
+                    text-decoration: none;
+                    display: block;
+                    text-align: center;
+                    border-radius: 5px;
+                    font-size: 1.1em;
+                    transition: background-color 0.3s ease;
+                }}
+                .menu-item:hover {{
+                    background-color: #2980b9;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .menu-item {{
+                        padding: 15px;
+                        font-size: 1.2em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .menu-item {{
+                        padding: 18px;
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -910,10 +1425,80 @@ class FPVQuizGame:
         <html>
         <head>
             <title>🎮 {controller_name.upper()}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 15px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                    margin-right: 10px;
+                }}
+                pre {{
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    font-size: 0.9em;
+                    background-color: #f8f9fa;
+                    padding: 10px;
+                    border-radius: 4px;
+                    overflow-x: auto; /* Прокрутка по горизонтали при необходимости */
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                    pre {{
+                        font-size: 0.85em;
+                        padding: 8px;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                    pre {{
+                        font-size: 0.8em;
+                        padding: 6px;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -926,7 +1511,9 @@ class FPVQuizGame:
                 <pre>{info['views']['front']}</pre>
                 <h3>Вид сбоку:</h3>
                 <pre>{info['views']['side']}</pre>
-                <a href="/show_controllers">← Назад к коллекции</a> | <a href="/">← Назад в меню</a>
+                <div>
+                    <a href="/show_controllers">← Назад к коллекции</a> | <a href="/">← Назад в меню</a>
+                </div>
             </div>
         </body>
         </html>
@@ -946,12 +1533,85 @@ class FPVQuizGame:
         <html>
         <head>
             <title>🥽 Коллекция FPV шлемов</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .menu-item {{ margin: 10px 0; padding: 10px; background-color: #3498db; color: white; text-decoration: none; display: block; text-align: center; border-radius: 5px; }}
-                .menu-item:hover {{ background-color: #2980b9; }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 20px;
+                }}
+                .menu-item {{
+                    margin: 10px 0;
+                    padding: 12px 15px;
+                    background-color: #3498db;
+                    color: white;
+                    text-decoration: none;
+                    display: block;
+                    text-align: center;
+                    border-radius: 5px;
+                    font-size: 1.1em;
+                    transition: background-color 0.3s ease;
+                }}
+                .menu-item:hover {{
+                    background-color: #2980b9;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .menu-item {{
+                        padding: 15px;
+                        font-size: 1.2em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .menu-item {{
+                        padding: 18px;
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -976,10 +1636,80 @@ class FPVQuizGame:
         <html>
         <head>
             <title>🥽 {goggle_name.upper()}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 15px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                    margin-right: 10px;
+                }}
+                pre {{
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    font-size: 0.9em;
+                    background-color: #f8f9fa;
+                    padding: 10px;
+                    border-radius: 4px;
+                    overflow-x: auto; /* Прокрутка по горизонтали при необходимости */
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                    pre {{
+                        font-size: 0.85em;
+                        padding: 8px;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                    pre {{
+                        font-size: 0.8em;
+                        padding: 6px;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -992,7 +1722,9 @@ class FPVQuizGame:
                 <pre>{info['views']['front']}</pre>
                 <h3>Вид сбоку:</h3>
                 <pre>{info['views']['side']}</pre>
-                <a href="/show_goggles">← Назад к коллекции</a> | <a href="/">← Назад в меню</a>
+                <div>
+                    <a href="/show_goggles">← Назад к коллекции</a> | <a href="/">← Назад в меню</a>
+                </div>
             </div>
         </body>
         </html>
@@ -1005,11 +1737,73 @@ class FPVQuizGame:
         if not self.components_learned:
             transfer_page = f"""
             <html>
+            <head>
+                <title>📡 Передача данных</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        background-color: #f0f0f0;
+                        margin: 0;
+                        padding: 20px;
+                        box-sizing: border-box;
+                    }}
+                    .container {{
+                        max-width: 100%;
+                        width: 100%;
+                        margin: 0 auto;
+                        background-color: white;
+                        padding: 15px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        box-sizing: border-box;
+                    }}
+                    h1 {{
+                        color: #2c3e50;
+                        text-align: center;
+                        font-size: 1.6em;
+                        margin-bottom: 20px;
+                    }}
+                    .back a {{
+                        color: #3498db;
+                        text-decoration: none;
+                        font-size: 1em;
+                    }}
+                    /* Адаптивность для мобильных устройств */
+                    @media (max-width: 768px) {{
+                        body {{
+                            padding: 10px;
+                        }}
+                        .container {{
+                            padding: 10px;
+                        }}
+                        h1 {{
+                            font-size: 1.4em;
+                        }}
+                        .back a {{
+                            font-size: 0.95em;
+                        }}
+                    }}
+                    @media (max-width: 480px) {{
+                        .container {{
+                            padding: 8px;
+                        }}
+                        h1 {{
+                            font-size: 1.3em;
+                        }}
+                        .back a {{
+                            font-size: 0.9em;
+                        }}
+                    }}
+                </style>
+            </head>
             <body>
-                <h1>📡 Передача данных</h1>
-                <p>❌ У вас нет изученных компонентов для передачи!</p>
-                <p>Сначала изучите компоненты в обучалке или викторине.</p>
-                <a href="/">← Назад в меню</a>
+                <div class="container">
+                    <h1>📡 Передача данных</h1>
+                    <p>❌ У вас нет изученных компонентов для передачи!</p>
+                    <p>Сначала изучите компоненты в обучалке или викторине.</p>
+                    <a href="/">← Назад в меню</a>
+                </div>
             </body>
             </html>
             """
@@ -1022,10 +1816,104 @@ class FPVQuizGame:
             <html>
             <head>
                 <title>📡 Передача данных</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <style>
-                    body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                    .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                    .back a {{ color: #3498db; text-decoration: none; }}
+                    body {{
+                        font-family: Arial, sans-serif;
+                        background-color: #f0f0f0;
+                        margin: 0;
+                        padding: 20px;
+                        box-sizing: border-box;
+                    }}
+                    .container {{
+                        max-width: 100%;
+                        width: 100%;
+                        margin: 0 auto;
+                        background-color: white;
+                        padding: 15px;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        box-sizing: border-box;
+                    }}
+                    h1 {{
+                        color: #2c3e50;
+                        text-align: center;
+                        font-size: 1.6em;
+                        margin-bottom: 20px;
+                    }}
+                    .back a {{
+                        color: #3498db;
+                        text-decoration: none;
+                        font-size: 1em;
+                    }}
+                    code {{
+                        background-color: #f8f9fa;
+                        padding: 2px 4px;
+                        border-radius: 3px;
+                    }}
+                    form {{
+                        margin-top: 20px;
+                    }}
+                    input[type="text"] {{
+                        width: 100%;
+                        padding: 10px;
+                        font-size: 1em;
+                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                        box-sizing: border-box;
+                    }}
+                    input[type="submit"] {{
+                        padding: 10px 20px;
+                        font-size: 1em;
+                        background-color: #3498db;
+                        color: white;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        margin-top: 10px;
+                    }}
+                    /* Адаптивность для мобильных устройств */
+                    @media (max-width: 768px) {{
+                        body {{
+                            padding: 10px;
+                        }}
+                        .container {{
+                            padding: 10px;
+                        }}
+                        h1 {{
+                            font-size: 1.4em;
+                        }}
+                        .back a {{
+                            font-size: 0.95em;
+                        }}
+                        input[type="text"] {{
+                            padding: 12px;
+                            font-size: 1.1em; /* Увеличиваем размер шрифта поля ввода */
+                        }}
+                        input[type="submit"] {{
+                            padding: 12px 20px;
+                            font-size: 1.1em;
+                        }}
+                    }}
+                    @media (max-width: 480px) {{
+                        .container {{
+                            padding: 8px;
+                        }}
+                        h1 {{
+                            font-size: 1.3em;
+                        }}
+                        .back a {{
+                            font-size: 0.9em;
+                        }}
+                        input[type="text"] {{
+                            padding: 14px;
+                            font-size: 1.2em;
+                        }}
+                        input[type="submit"] {{
+                            padding: 14px 20px;
+                            font-size: 1.2em;
+                        }}
+                    }}
                 </style>
             </head>
             <body>
@@ -1093,10 +1981,62 @@ class FPVQuizGame:
         <html>
         <head>
             <title>📥 Результат получения данных</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 20px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                }}
             </style>
         </head>
         <body>
@@ -1126,10 +2066,62 @@ class FPVQuizGame:
         <html>
         <head>
             <title>📊 Ваша статистика</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-                body {{ font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; padding: 20px; }}
-                .container {{ max-width: 800px; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-                .back a {{ color: #3498db; text-decoration: none; }}
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f0f0f0;
+                    margin: 0;
+                    padding: 20px;
+                    box-sizing: border-box;
+                }}
+                .container {{
+                    max-width: 100%;
+                    width: 100%;
+                    margin: 0 auto;
+                    background-color: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    box-sizing: border-box;
+                }}
+                h1 {{
+                    color: #2c3e50;
+                    text-align: center;
+                    font-size: 1.6em;
+                    margin-bottom: 20px;
+                }}
+                .back a {{
+                    color: #3498db;
+                    text-decoration: none;
+                    font-size: 1em;
+                }}
+                /* Адаптивность для мобильных устройств */
+                @media (max-width: 768px) {{
+                    body {{
+                        padding: 10px;
+                    }}
+                    .container {{
+                        padding: 10px;
+                    }}
+                    h1 {{
+                        font-size: 1.4em;
+                    }}
+                    .back a {{
+                        font-size: 0.95em;
+                    }}
+                }}
+                @media (max-width: 480px) {{
+                    .container {{
+                        padding: 8px;
+                    }}
+                    h1 {{
+                        font-size: 1.3em;
+                    }}
+                    .back a {{
+                        font-size: 0.9em;
+                    }}
+                }}
             </style>
         </head>
         <body>
